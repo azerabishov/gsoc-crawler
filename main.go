@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/html"
 	"sync"
 	"time"
+	// "html/template"
 )
 
 
@@ -17,65 +18,67 @@ const (
 	url = "https://summerofcode.withgoogle.com/archive/2020/organizations/6264664972853248/"
 )
 
-type Organizations struct{
+type Organization struct{
 	Name, Url string
 	Technologies []string
 }
 
-
-
-func getOrganizatiosUrl(url string)  ([]string, error){
-	var urls []string
-
-	res, err := http.Get(Base_url)
-	
-	if err != nil {
-		return nil, err
-	}
-
-	doc, _ := html.Parse(res.Body)
-
-	getUrl(doc, &urls)
-
-	return urls, nil
-
+type Store struct {
+	Urls			[]string
+	Organizations 	[]Organization
 }
 
 
-func getUrl(n *html.Node, urls *[]string){
-	if n.Type == html.ElementNode && n.Data == "a" {
-		for _, a := range n.Attr {
-			if a.Key == "href" {
-				*urls = append(*urls, a.Val)
+func (s *Store) fetchUrls(url string) {
+	res, err := http.Get(Base_url)
+	
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+	
+	doc, _ := html.Parse(res.Body)
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "a" {
+			for _, a := range n.Attr {
+				if a.Key == "href" {
+					s.Urls = append(s.Urls, a.Val)
+				}
 			}
+		}
+	
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
 		}
 	}
 
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		getUrl(c, urls)
-	}
+	f(doc)
+
 
 }
 
-func getTechnology(url string, c chan Organizations, wg *sync.WaitGroup){
+
+
+func fetchTechnologies(url string, c chan Organization, wg *sync.WaitGroup){
 	res, _ := http.Get(Second_base_url + url)
 
 	doc, _ := html.Parse(res.Body)
 
-	var umumi Organizations
+	var organization Organization
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "li" {
 			for _, a := range n.Attr {
 				if a.Val == "organization__tag organization__tag--technology" {
-					umumi.Technologies = append(umumi.Technologies, n.FirstChild.Data)
+					organization.Technologies = append(organization.Technologies, n.FirstChild.Data)
 					break
 				}
 			}
 		}else if n.Type == html.ElementNode && n.Data == "h3" {
 			for _, a := range n.Attr {
 				if a.Key == "class" {
-					umumi = Organizations{Name: n.FirstChild.Data, Url: url}
+					organization = Organization{Name: n.FirstChild.Data, Url: url}
 				}
 			}
 		}
@@ -86,48 +89,67 @@ func getTechnology(url string, c chan Organizations, wg *sync.WaitGroup){
 	}
 	f(doc)
 
-	c<-umumi
+	c<-organization
 	wg.Done()
-
-	// return umumi, nil
 }
 
 
-func main()  {
+func newStore() *Store {
+	return &Store{
+		Urls: []string{},
+		Organizations: []Organization{},
+		}
+}
 
+func main()  {
 	start := time.Now()
-	var result []Organizations
+
+	store := newStore()
+	
 	var wg sync.WaitGroup
 
-	data, err := getOrganizatiosUrl(url)
+	store.fetchUrls(url)
 	
-	if err != nil{
-		fmt.Println(err)
-		return
-	}
-	data = data[3:(len(data)-15)]
 
-	var resultCh =  make(chan Organizations, 200)
+	data := store.Urls[3:(len(store.Urls)-15)]
+
+	var resultCh =  make(chan Organization, 200)
 
 
 	wg.Add(len(data))
 
 	for _, i := range data {
-		go getTechnology(i, resultCh, &wg)
+		go fetchTechnologies(i, resultCh, &wg)
 	}
-
 
 
 	wg.Wait()
 	
 	for i := 0; i < len(data); i++ {
-		result = append(result, <-resultCh)
+		store.Organizations = append(store.Organizations, <-resultCh)
 	}
 
+	// mux := http.NewServeMux()
 
-	fmt.Println(result)
+	// fs := http.FileServer(http.Dir("static"))
+	// mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	// mux.HandleFunc("/", index)
+
+	// tmpl := template.Must(template.ParseFiles("index.tmpl"))
+
+	// tmpl.Execute
+	fmt.Println(store.Organizations)
 
 
 	fmt.Println(time.Now().Sub(start))
 
 }
+
+// func index(w http.ResponseWriter, r *http.Request) {
+// 	if err := indexTmpl.Execute(w, data.getOrganizations())
+// }
+
+
+// func (d *data) getOrganizations() {
+	
+// }
