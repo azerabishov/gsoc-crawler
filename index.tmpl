@@ -1,95 +1,140 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Quiet Hacker News</title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="keywords" content="hacker news, hacker, news, quiet, quiet hacker news, tom speak, hn, hn without comments, hacker news without comments, hacker news no comments">
-    <meta name="HandheldFriendly" content="true" />
-    <meta name="Description" content="A quieter approach to Hacker News. Links and nothing else." />
+<html lang="en">
 
-    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="/static/favicons/apple-touch-icon-57x57.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/favicons/apple-touch-icon-114x114.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/favicons/apple-touch-icon-72x72.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/static/favicons/apple-touch-icon-144x144.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="/static/favicons/apple-touch-icon-60x60.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="/static/favicons/apple-touch-icon-120x120.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="/static/favicons/apple-touch-icon-76x76.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/static/favicons/apple-touch-icon-152x152.png" />
-    <link rel="icon" type="image/png" href="/static/favicons/favicon-196x196.png" sizes="196x196" />
-    <link rel="icon" type="image/png" href="/static/favicons/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/png" href="/static/favicons/favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="/static/favicons/favicon-16x16.png" sizes="16x16" />
-    <link rel="icon" type="image/png" href="/static/favicons/favicon-128.png" sizes="128x128" />
-    <meta name="application-name" content="Quiet Hacker News"/>
-    <meta name="msapplication-TileColor" content="#FF660" />
-    <meta name="msapplication-TileImage" content="/static/favicons/mstile-144x144.png" />
-    <meta name="msapplication-square70x70logo" content="/static/favicons/mstile-70x70.png" />
-    <meta name="msapplication-square150x150logo" content="/static/favicons/mstile-150x150.png" />
-    <meta name="msapplication-wide310x150logo" content="/static/favicons/mstile-310x150.png" />
-    <meta name="msapplication-square310x310logo" content="/static/favicons/mstile-310x310.png" />
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- <link rel="stylesheet" href="assets/css/templatemo-sixteen.css"> -->
+    <!-- <link rel="stylesheet" href="assets/css/owl.css"> -->
 
     <style>
-      html, body { background: #F0F0F0; }
-      body {
-        width: 700px;
-        margin: 44px auto;
+      .techonologies {
+        background-color: rgba(0,0,0,.54);
+        margin: 3px;
+        white-space: nowrap;
+        color: white;
+        border-radius: 4px;
       }
-      ol {
-        list-style: ;
-        margin: 0 0 0 18px;
-        padding: 0;
-      }
-      li {
-        margin-bottom: 22px;
-      }
-      .links {
-        margin-top: 64px;
-        padding-bottom: 4px;
-      }
-      .links a {
-        float: left;
-      }
-      .links a:last-of-type {
-        float: right;
+      hr.style7 {
+        border-top: 1px solid #8c8b8b;
+        border-bottom: 1px solid #fff;
       }
 
-      @media only screen and (max-device-width: 820px) {
-        body {
-          width: 85%;
-        }
-        h1 {
-          margin-bottom: 30px;
-          font-size: 40px;
-        }
-        li {
-          margin-bottom: 50px;
-          font-size: 20px;
-        }
-        li span {
-          display: block;
-        }
-        .links a {
-          font-size: 18px;
-        }
+      .imgContainer {
+        /* display: flex; */
+        margin: auto;
+
+        height: 150px;
+        width: auto;
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
       }
     </style>
+
+    <title>Gsoc crawler</title>
   </head>
+
   <body>
-    <h1>Quiet Hacker News</h1>
 
-    <ol>
-      {{ range $key, $value := . }}
-        <li><a href="{{ $value.URL }}">{{ $value.Title }}</a> <span>({{ $value.Host }})</span></li>
-      {{ end }}
-    </ol>
+    <!-- ***** Preloader Start ***** -->
 
-    <div class="links">
-      <a href="https://speak.sh/posts/quiet-hacker-news">What is this?</a>
-      <a href="http://github.com/tomspeak/quiet-hacker-news">Code</a>
+    <!-- ***** Preloader End ***** -->
+
+
+    <div class="latest-products">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="row">
+
+              <div class="d-flex justify-content-start">
+                <h2>Gsoc crawler</h2>
+              </div>
+  
+              <div class="ml-auto">
+                <div class="input-group rounded">
+                  <input type="search" class="form-control rounded" placeholder="Search by techonologies" aria-label="Search"
+                    aria-describedby="search-addon" />
+                  <span class="input-group-text border-0" id="search-addon">
+                    <i class="fas fa-search"></i>
+                  </span>
+                </div>
+              </div>
+  
+              <div class="ml-auto">
+                <select class="custom-select" style="width:150px;">
+                  <option>Pizzas</option>
+                  <option>Burger</option>
+                  <option>Ice Cream</option>
+                  <option>Fried Potatoes</option>
+              </select>
+              </div>
+
+            </div>
+  
+
+            <hr class="style7" style="margin-bottom: 40px;">
+
+          </div> 
+          {{ range $key, $value := . }}
+          <div class="col-md-4" style="margin-bottom: 20px;">
+            <div class="card">
+              <div class="imgContainer">
+                <a href="#"><img style="padding: 10px;" src="https:{{ $value.Logo }}" alt=""></a>
+              </div>
+              <div class="card-body">
+                <a href="#" ><h4 style="margin-bottom: 20px;">{{ $value.Name }}</h4></a>
+                <div class="container">
+                  <div class="row">
+                    {{ range $key, $valueData := $value.Technologies }}
+                        <div  class="techonologies col">{{$valueData}}</div>
+                    {{ end }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {{ end }}
+
+        </div>
+      </div>
     </div>
 
 
+    
+ 
+
+    
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="inner-content">
+              <p>Author &copy; Azer Abishov
+            
+            - <a href="https://templatemo.com" target="_blank">Source code</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+
   </body>
+
 </html>

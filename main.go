@@ -4,11 +4,13 @@ package main
 import (
 	"fmt"
 	"net/http"
-	// "io/ioutil"
 	"golang.org/x/net/html"
+	"log"
 	"sync"
-	"time"
-	// "html/template"
+	"html/template"
+	"encoding/json"
+	// "os"
+	"strings"
 )
 
 
@@ -18,8 +20,12 @@ const (
 	url = "https://summerofcode.withgoogle.com/archive/2020/organizations/6264664972853248/"
 )
 
+var (
+	tmpl = template.Must(template.ParseFiles("index.tmpl"))
+	store = newStore()
+)
 type Organization struct{
-	Name, Url string
+	Name, Url, Logo string
 	Technologies []string
 }
 
@@ -36,7 +42,7 @@ func (s *Store) fetchUrls(url string) {
 		fmt.Println(err)
 		return
 	}
-	
+
 	doc, _ := html.Parse(res.Body)
 	var f func(*html.Node)
 	f = func(n *html.Node) {
@@ -64,7 +70,6 @@ func fetchTechnologies(url string, c chan Organization, wg *sync.WaitGroup){
 	res, _ := http.Get(Second_base_url + url)
 
 	doc, _ := html.Parse(res.Body)
-
 	var organization Organization
 	var f func(*html.Node)
 	f = func(n *html.Node) {
@@ -78,10 +83,19 @@ func fetchTechnologies(url string, c chan Organization, wg *sync.WaitGroup){
 		}else if n.Type == html.ElementNode && n.Data == "h3" {
 			for _, a := range n.Attr {
 				if a.Key == "class" {
-					organization = Organization{Name: n.FirstChild.Data, Url: url}
+					organization.Name = n.FirstChild.Data
+					organization.Url = url
+				}
+			}
+		}else if n.Type == html.ElementNode && n.Data == "org-logo" {
+			for _, a := range n.Attr {
+				if a.Key == "data" {
+					organization.Logo = strings.Split(a.Val, "'")[3];
+
 				}
 			}
 		}
+		
 
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c)
@@ -89,6 +103,7 @@ func fetchTechnologies(url string, c chan Organization, wg *sync.WaitGroup){
 	}
 	f(doc)
 
+	fmt.Println(organization)
 	c<-organization
 	wg.Done()
 }
@@ -102,10 +117,6 @@ func newStore() *Store {
 }
 
 func main()  {
-	start := time.Now()
-
-	store := newStore()
-	
 	var wg sync.WaitGroup
 
 	store.fetchUrls(url)
@@ -129,27 +140,72 @@ func main()  {
 		store.Organizations = append(store.Organizations, <-resultCh)
 	}
 
-	// mux := http.NewServeMux()
+	mux := http.NewServeMux()
 
-	// fs := http.FileServer(http.Dir("static"))
-	// mux.Handle("/static/", http.StripPrefix("/static/", fs))
-	// mux.HandleFunc("/", index)
+	fs := http.FileServer(http.Dir("static"))
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.HandleFunc("/", index)
+	mux.HandleFunc("/handle", handleOrganizationRequest)
+	hs := &http.Server{
+		Addr:         ":9090",
+		Handler:      mux,
+	}
 
-	// tmpl := template.Must(template.ParseFiles("index.tmpl"))
-
-	// tmpl.Execute
-	fmt.Println(store.Organizations)
-
-
-	fmt.Println(time.Now().Sub(start))
+	err := hs.ListenAndServe()
+	if err != nil {
+		log.Fatal("Listen and Serve: ", err)
+	}
 
 }
 
-// func index(w http.ResponseWriter, r *http.Request) {
-// 	if err := indexTmpl.Execute(w, data.getOrganizations())
-// }
+
+func handleOrganizationRequest(w http.ResponseWriter, r *http.Request) {
+	// var wg sync.WaitGroup
+	fmt.Println("store.Organizations")
 
 
-// func (d *data) getOrganizations() {
+	// store.fetchUrls(url)
 	
-// }
+
+	// data := store.Urls[3:(len(store.Urls)-15)]
+
+	// var resultCh =  make(chan Organization, 200)
+
+
+	// wg.Add(len(data))
+
+	// for _, i := range data {
+	// 	go fetchTechnologies(i, resultCh, &wg)
+	// }
+
+
+	// wg.Wait()
+	
+	// for i := 0; i < len(data); i++ {
+	// 	store.Organizations = append(store.Organizations, <-resultCh)
+	// }
+
+	fmt.Println("store.Organizations")
+	// fmt.Println(store.getOrganizations())
+	b, err := json.Marshal(store.getOrganizations())
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println(string(b))
+
+    w.Write([]byte(string(b)))
+	// fmt.Fprintf(w, store.Organizations)
+
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+	if err := tmpl.Execute(w, store.getOrganizations()); err != nil {
+		log.Fatal(err)
+	}
+}
+
+
+func (s *Store) getOrganizations() []Organization{
+	return s.Organizations
+}
