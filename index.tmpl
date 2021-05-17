@@ -8,11 +8,7 @@
     <meta name="description" content="">
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
 
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- <link rel="stylesheet" href="assets/css/templatemo-sixteen.css"> -->
-    <!-- <link rel="stylesheet" href="assets/css/owl.css"> -->
 
     <style>
       .techonologies {
@@ -39,17 +35,47 @@
         max-width: 100%;
         max-height: 100%;
       }
+
+      
+      body {
+        font-family: 'Poppins', sans-serif;
+        overflow-x: hidden;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      p {
+        margin-bottom: 0px;
+        font-size: 14px;
+        font-weight: 300;
+        color: #4a4a4a;
+        line-height: 24px;
+      }
+
+
+      .latest-products {
+        margin-top: 100px;
+      }
+
+      
+      footer {
+        text-align: center;
+      }
+
+      footer .inner-content {
+        border-top: 1px solid #eee;
+        margin-top: 60px;
+        padding: 60px 0px;
+      }
+
+
+
     </style>
 
     <title>Gsoc crawler</title>
   </head>
 
   <body>
-
-    <!-- ***** Preloader Start ***** -->
-
-    <!-- ***** Preloader End ***** -->
-
 
     <div class="latest-products">
       <div class="container">
@@ -72,11 +98,12 @@
               </div>
   
               <div class="ml-auto">
-                <select class="custom-select" style="width:150px;">
-                  <option>Pizzas</option>
-                  <option>Burger</option>
-                  <option>Ice Cream</option>
-                  <option>Fried Potatoes</option>
+                <select id="year" class="custom-select" style="width:150px;">
+                  <option value="">Select year</option>
+                {{ range $key, $value := . }}
+                  <option value="{{$value.Url}}">{{$value.Title}}</option>
+                {{ end }}
+
               </select>
               </div>
 
@@ -86,30 +113,17 @@
             <hr class="style7" style="margin-bottom: 40px;">
 
           </div> 
-          {{ range $key, $value := . }}
-          <div class="col-md-4" style="margin-bottom: 20px;">
-            <div class="card">
-              <div class="imgContainer">
-                <a href="#"><img style="padding: 10px;" src="https:{{ $value.Logo }}" alt=""></a>
-              </div>
-              <div class="card-body">
-                <a href="#" ><h4 style="margin-bottom: 20px;">{{ $value.Name }}</h4></a>
-                <div class="container">
-                  <div class="row">
-                    {{ range $key, $valueData := $value.Technologies }}
-                        <div  class="techonologies col">{{$valueData}}</div>
-                    {{ end }}
-                  </div>
-                </div>
+          <div class="row" id="organization-container">
+            <div class="col-md-12">
+              <div class="row justify-content-center">
+                  <h1>Please select year</h1>
               </div>
             </div>
           </div>
-          {{ end }}
 
-        </div>
+
       </div>
     </div>
-
 
     
  
@@ -120,14 +134,62 @@
         <div class="row">
           <div class="col-md-12">
             <div class="inner-content">
-              <p>Author &copy; Azer Abishov
-            
-            - <a href="https://templatemo.com" target="_blank">Source code</a></p>
+             <a href="https://templatemo.com" target="_blank">Source code</a></p>
             </div>
           </div>
         </div>
       </div>
     </footer>
+
+   <script>
+    let cards = "";
+    let technologies = "";
+
+    document.querySelector('#year').addEventListener("change", function() {
+        let organizationContainer = document.getElementById("organization-container")
+        if (this.value == "") {
+            organizationContainer.innerHTML = `<div class="col-md-12"> <div class="row justify-content-center"> <h1>Please select year</h1> </div> </div>`
+
+        }else{
+            organizationContainer.innerHTML = `<div class="col-md-12"> <div class="row justify-content-center"> <div class="spinner-border" role="status"> <span class="sr-only">Loading...</span> </div> </div> </div>`
+            let data = {year: this.value};
+            
+            fetch('http://localhost:9090/organizations', {
+              method: 'POST', // or 'PUT'
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            }).then(response => response.json())
+            .then(organizations => {
+                console.log(organizations)
+                          
+                  organizations.forEach(element => {
+                    element.Technologies.forEach(technology => {
+                      technologies += `<div  class="techonologies col">${technology}</div>`
+                    })  
+                    cards += `<div class="col-md-4" style="margin-bottom: 20px;"> <div class="card"> <div class="imgContainer"> <a href="#" ><img style="padding: 10px;" src="${element.Logo}" alt=""></a></div> <div class="card-body"> <a href="#" ><h4 style="margin-bottom: 20px;">${element.Title}</h4></a>  <div class="container"> <div class="row"> <div  class="techonologies col">elastich search</div> <div  class="techonologies col">elastich</div> ${technologies}  </div>  </div> </div>  </div> </div>`
+                    technologies = ""
+                  });
+                  organizationContainer.innerHTML = cards;
+              })
+
+
+        }
+    });
+
+    async function fetchOrganizations(year) {
+        let organizations = await fetch("http://localhost:9090/organizations", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+        return organizations.json()
+    }
+
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
